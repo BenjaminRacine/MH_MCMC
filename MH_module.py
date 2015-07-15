@@ -126,6 +126,7 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,*arg):
     """
     acceptance = 0
     tests = []
+    failed = []
     i=0
     f_old = functional_form(guess,*arg[0])
     tests.append((guess))
@@ -149,7 +150,8 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,*arg):
                 acceptance+=1
                 f_old = f_new
             else:
+                failed.append((guess_new))
                 pass
         i+=1
     print "acceptance rate = ",float(acceptance)/niter
-    return tests
+    return tests,failed

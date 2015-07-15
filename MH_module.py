@@ -134,7 +134,7 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,*arg):
         guess_new = guess + proposal(*arg[1])
         f_new = functional_form(guess_new,*arg[0])
         A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
-        print A,f_new
+        print A,"f_new = ",f_new,"f_old = ",f_old,"prop(old/new) = ",proposal_fun(guess,guess_new,*arg[1]), "prop(new/old) = ",proposal_fun(guess_new,guess,*arg[1])
         #### will have to implement a log 
         if A==0:
             guess=guess_new

@@ -1,5 +1,5 @@
 import numpy as np
-
+from matplotlib import pyplot as plt
 
 
 def Equation_ap(x,A,b):
@@ -135,7 +135,7 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,*arg):
         guess_new = guess + proposal(*arg[1])
         f_new = functional_form(guess_new,*arg[0])
         A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
-        print A,"f_new = ",f_new,"f_old = ",f_old,"prop(old/new) = ",proposal_fun(guess,guess_new,*arg[1]), "prop(new/old) = ",proposal_fun(guess_new,guess,*arg[1])
+        print A,"f_new = ",f_new,"f_old = ",f_old#,"prop(old/new) = ",proposal_fun(guess,guess_new,*arg[1]), "prop(new/old) = ",proposal_fun(guess_new,guess,*arg[1])
         #### will have to implement a log 
         if A==0:
             guess=guess_new
@@ -155,3 +155,68 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,*arg):
         i+=1
     print "acceptance rate = ",float(acceptance)/niter
     return tests,failed
+
+
+def MCMC_log_test(guess,functional_form,proposal,proposal_fun,niter,*arg):
+    """
+    Same as previous, but for log likelihood
+
+    Keyword Arguments:
+    guess -- initial guess vector (np.array)
+    functional_form -- form you are trying to sample
+    proposal -- proposal random generator for next step
+    proposal_fun -- proposal function to calculate ratios (next version should have both proposal and proposal_fun in one go)
+    niter -- number of iterations
+    *arg -- arguments that could be used by the functional form, and the proposal: *arg[0] for the functional, *arg[1] for the proposal. It can be for example *arg = [A,x],[]
+    """
+    acceptance = 0
+    tests = []
+    failed = []
+    i=0
+    f_old,Cl = functional_form(guess,*arg[0])
+    plt.figure(10)
+    plt.loglog(Cl,"y",label="initial guess",)
+    tests.append((guess))
+    Cls = []
+    while i<niter:
+        print i
+        guess_new = guess + proposal(*arg[1])
+        f_new,Cl = functional_form(guess_new,*arg[0])
+        Cls.append(Cl)
+        A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
+        print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess#,"prop(old/new) = ",proposal_fun(guess,guess_new,*arg[1]), "prop(new/old) = ",proposal_fun(guess_new,guess,*arg[1])
+        #### will have to implement a log 
+        if A==0:
+            guess=guess_new
+            tests.append((guess))
+            acceptance+=1
+            f_old = f_new
+            print "f_old = ",f_old
+            plt.loglog(Cl,"g",label="%d"%i,alpha = 0.5+i/100.)
+        elif A<0:
+            u = np.log(np.random.rand(1))
+            if u <= A:
+                guess=guess_new
+                tests.append((guess))
+                acceptance+=1
+                f_old = f_new
+                print "f_old = ",f_old
+                plt.loglog(Cl,"b",label="%d"%i,alpha = 0.5+i/100.)
+            else:
+                failed.append((guess_new))
+                plt.loglog(Cl,"%f"%(i/100.), alpha=0.2)
+                "f_old = ",f_old
+                pass
+                
+        i+=1
+        plt.draw()
+    print "acceptance rate = ",float(acceptance)/niter
+    return tests,failed,Cls
+
+
+
+
+
+
+
+

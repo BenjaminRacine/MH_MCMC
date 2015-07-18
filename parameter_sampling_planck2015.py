@@ -14,7 +14,7 @@ strings=['ombh2','omch2','re_optical_depth','scalar_amp(1)','scalar_spectral_ind
 
 titles = ["$\Omega_b h^2$","$\Omega_c h^2$",r"100*$\theta_{MC}$",r"$\tau$","$A_s$","$n_s$"]
 
-which_par = [4] # exclude Theta_MC (for now, since I don't have it in CAMB, should choose another one, perhaps H0)
+which_par = [0,1,2,3,4,5] # exclude Theta_MC (for now, since I don't have it in CAMB, should choose another one, perhaps H0)
 
 
 #inital guess, planck 2013 planck+WP, corrmat from likelihood paper

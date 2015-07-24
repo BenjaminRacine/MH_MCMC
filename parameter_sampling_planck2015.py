@@ -17,7 +17,7 @@ random_id = np.random.randint(0,100000)
 
 
 
-dd  = cb.ini2dic("/Users/benjar/Travail/camb/Planck_params_params.ini")
+dd  = cb.ini2dic(camb_dir+"Planck_params_params.ini")
 
 
 

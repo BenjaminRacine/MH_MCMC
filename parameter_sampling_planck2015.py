@@ -17,7 +17,7 @@ dd  = cb.ini2dic("/Users/benjar/Travail/camb/Planck_params_params.ini")
 
 
 
-which_par = [0] # exclude Theta_MC (for now, since I don't have it in CAMB, should choose another one, perhaps H0)
+#which_par = [0] # exclude Theta_MC (for now, since I don't have it in CAMB, should choose another one, perhaps H0)
 strings=np.array(['ombh2','omch2',"theta",'re_optical_depth','scalar_amp(1)','scalar_spectral_index(1)'])
 
 titles = np.array(["$\Omega_b h^2$","$\Omega_c h^2$",r"100*$\theta_{MC}$",r"$\tau$","$A_s$","$n_s$"])
@@ -78,14 +78,14 @@ def plot_input(dlm):
 
 
 
-def run_MCMC(which_par):
+def run_MCMC(which_par,niter):
     cov_new_temp = cov_new[which_par,:][:,which_par]
     string_temp = strings[which_par]
     titles_temp = titles[which_par]
     x_mean_temp = x_mean[which_par]
     print titles_temp
     guess_param = PS2P.prop_dist_form_params(x_mean_temp,cov_new_temp)
-    testss = np.array(MH.MCMC_log_test(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,100,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)]))
+    testss = np.array(MH.MCMC_log_test(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,niter,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)]))
     #print "%.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
     return testss
 

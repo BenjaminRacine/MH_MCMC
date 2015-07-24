@@ -7,11 +7,16 @@ import healpy as hp
 import CG_functions as CG
 import MH_module as MH
 import PS2param_module as PS2P
-
+import sys
+try:
+    from local_paths import *
+except:
+    print "you need to define local_paths.py, that defines, for example: \ncamb_dir = '/Users/benjar/Travail/camb/' \n and the output path for the temporary ini files: \noutput_camb = '../MH_MCMC/camb_ini/test1'"
+    sys.exit()
 random_id = np.random.randint(0,100000)
 
 
-camb_dir = "/Users/benjar/Travail/camb/"
+
 dd  = cb.ini2dic("/Users/benjar/Travail/camb/Planck_params_params.ini")
 
 
@@ -22,7 +27,7 @@ strings=np.array(['ombh2','omch2',"theta",'re_optical_depth','scalar_amp(1)','sc
 
 titles = np.array(["$\Omega_b h^2$","$\Omega_c h^2$",r"100*$\theta_{MC}$",r"$\tau$","$A_s$","$n_s$"])
 #inital guess, planck 2013 planck+WP, corrmat from likelihood paper
-dd["output_root"] = '../Codes/CG_git/MH_MCMC/camb_ini/test_%d'%random_id
+dd["output_root"] = output_camb+'_%d'%random_id
 
 dd['ombh2'] =  0.02222
 dd['omch2'] =  0.1197 

@@ -10,11 +10,11 @@ import MH_module as MH
 camb_dir = "/Users/benjar/Travail/camb/"
 dd  = cb.ini2dic("/Users/benjar/Travail/camb/Planck_params_params.ini")
 
-strings=['ombh2','omch2','re_optical_depth','scalar_amp(1)','scalar_spectral_index(1)']
+#strings=['ombh2','omch2','re_optical_depth','scalar_amp(1)','scalar_spectral_index(1)']
 
 titles = ["$\Omega_b h^2$","$\Omega_c h^2$",r"100*$\theta_{MC}$",r"$\tau$","$A_s$","$n_s$"]
 
-which_par = [0,1,2,3,4,5] # exclude Theta_MC (for now, since I don't have it in CAMB, should choose another one, perhaps H0)
+which_par = [0] # exclude Theta_MC (for now, since I don't have it in CAMB, should choose another one, perhaps H0)
 
 
 #inital guess, planck 2013 planck+WP, corrmat from likelihood paper
@@ -60,9 +60,9 @@ nl = 1.7504523623688016e-16*1e12 * np.ones(2500)
 bl = CG.gaussian_beam(2500,5)
 
 Cl = cb.generate_spectrum(dd)
-lmax = Cl.shape[0]
+lmax = Cl.shape[0]-1
 alm = hp.synalm(Cl[:,1])
-dlm = hp.almxfl(alm,bl[:lmax]) + hp.synalm(nl[:lmax])
+dlm = hp.almxfl(alm,bl[:lmax+1]) + hp.synalm(nl[:lmax+1])
 
 
 def plot_input(dlm):
@@ -72,6 +72,49 @@ def plot_input(dlm):
     
 #    print "input map: cl[10] = ", Cl[10,1]
 
+
+def functional_form_params_o(x,*arg):
+    """
+    Keyword Arguments:
+    x -- the vector of params
+
+    *args are:
+    dlm -- input map
+    x_str -- the dictionary strings corresponding to x
+    params -- a camber dictionnary
+    noise -- a noise power spectrum
+    beam -- a beam power spectrum
+    """
+    dlm = arg[0]
+    strings = arg[1]
+    params = arg[2].copy()
+    noise = arg[3]
+    beam = arg[4]
+    #params["output_root"] = '../Codes/CG_git/MH_MCMC/camb_ini/test%d'%np.random.randint(100)
+    for i in range(np.size(x)):
+        print strings[i]
+        if strings[i]=='scalar_amp(1)':
+            print params[strings[i]]
+            params[strings[i]]=np.exp(x[i])*1e-10
+            print params[strings[i]]
+        else:
+            params[strings[i]]=x[i]
+    Cl = cb.generate_spectrum(params)
+    print params["ombh2"]
+    plt.figure(10)
+    plt.loglog(Cl[:,1],",")
+    print "cl[10] = ", Cl[10,1]
+    lmax = Cl.shape[0]
+    #alm = hp.synalm(Cl[:,1])
+    #dlm = hp.almxfl(alm,beam[:lmax]) + hp.synalm(noise[:lmax])
+    tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*Cl[:,1]+noise[:lmax]))))
+    print "dlm[10]",dlm[10]
+    print tt
+    #print (noise[:lmax]+Cl[:,1]).sum()
+    #determinant is the product of the diagonal element: in log:
+    tt = -1/2. * tt  - 1./2 *(noise[:lmax]+Cl[:,1]*beam[:lmax]**2).sum()
+    return tt,Cl[:,1]
+    
 
 def functional_form_params(x,*arg):
     """
@@ -105,8 +148,8 @@ def functional_form_params(x,*arg):
     plt.loglog(Cl[:,1],",")
     print "cl[10] = ", Cl[10,1]
     lmax = Cl.shape[0]
-   #alm = hp.synalm(Cl[:,1])
-    #dlm = hp.almxfl(alm,beam[:lmax]) + hp.synalm(noise[:lmax])
+    alm = hp.synalm(Cl[:,1])
+    dlm = hp.almxfl(alm,beam[:lmax]) + hp.synalm(noise[:lmax])
     tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*Cl[:,1]+noise[:lmax]))))
     print "dlm[10]",dlm[10]
     print tt
@@ -114,7 +157,6 @@ def functional_form_params(x,*arg):
     #determinant is the product of the diagonal element: in log:
     tt = -1/2. * tt  - 1./2 *(noise[:lmax]+Cl[:,1]*beam[:lmax]**2).sum()
     return tt,Cl[:,1]
-    
     
 def prop_func_form_params(param1,param2,*arg):
     """
@@ -169,15 +211,49 @@ guess_param = prop_dist_form_params(x_mean,cov_new)
 
 
 def test_loglike(dlm,Cl,noise,beam):
-    tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*Cl[:,1]+noise[:lmax]))))
-    #plt.plot(Cl[:,1])    
-    tt = -1/2. * tt  - 1./2 *(noise[:lmax]+Cl[:,1]*beam[:lmax]**2).sum()
-    return tt,Cl[:,1]
+    tt_exp = -1./2 * np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax+1]**2*Cl[:,1]+noise[:lmax+1]))))
+    #plt.plot(Cl[:,1])
+    tt_det = - 1./2 *(np.arange(1,lmax+2)*np.log((noise[:lmax+1]+Cl[:,1]*beam[:lmax+1]**2))).sum() 
+    tt_f = tt_exp  + tt_det
+    return tt_exp,tt_det,tt_f#,Cl[:,1]
 
-def test_loglike(dlm,cl,noise,beam):
-    lmax=np.size(cl)
-    tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*cl-noise[:lmax]))))
-    #plt.plot(Cl[:,1])    
-    tt2 = -1/2.*tt  - 1./2*(noise[:lmax]+cl*beam[:lmax]**2).sum()
-    return tt2, -1/2.*np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*cl-noise[:lmax]))))-1./2*(noise[:lmax]+cl*beam[:lmax]**2).sum()
-    
+
+
+
+def functional_form_params_n(x,*arg):
+    """
+    Keyword Arguments:
+    x -- the vector of params
+
+    *args are:
+    dlm -- input map
+    x_str -- the dictionary strings corresponding to x
+    params -- a camber dictionnary
+    noise -- a noise power spectrum
+    beam -- a beam power spectrum
+    """
+    dlm = arg[0]
+    strings = arg[1]
+    params = arg[2].copy()
+    noise = arg[3]
+    beam = arg[4]
+    #params["output_root"] = '../Codes/CG_git/MH_MCMC/camb_ini/test%d'%np.random.randint(100)
+    for i in range(np.size(x)):
+        print strings[i]
+        if strings[i]=='scalar_amp(1)':
+            print params[strings[i]]
+            params[strings[i]]=np.exp(x[i])*1e-10
+            print params[strings[i]]
+        else:
+            params[strings[i]]=x[i]
+    Cl = cb.generate_spectrum(params)
+    plt.figure(10)
+    plt.loglog(Cl[:,1],",")
+    lmax = Cl.shape[0]
+    #alm = hp.synalm(Cl[:,1])
+    #dlm = hp.almxfl(alm,beam[:lmax]) + hp.synalm(noise[:lmax])
+    tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*Cl[:,1]+noise[:lmax]))))
+    #print (noise[:lmax]+Cl[:,1]).sum()
+    #determinant is the product of the diagonal element: in log:
+    tt = -1/2. * tt  - 1./2 *(np.arange(1,lmax+1)*np.log(noise[:lmax]+Cl[:,1]*beam[:lmax]**2)).sum()
+    return tt,Cl[:,1]

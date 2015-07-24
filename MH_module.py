@@ -178,33 +178,38 @@ def MCMC_log_test(guess,functional_form,proposal,proposal_fun,niter,*arg):
     plt.loglog(Cl,"y",label="initial guess",)
     tests.append((guess))
     Cls = []
+    guesses = []
+    As = []
     while i<niter:
         print i
         guess_new = guess + proposal(*arg[1])
+        guesses.append(guess_new)
         f_new,Cl = functional_form(guess_new,*arg[0])
         Cls.append(Cl)
         A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
         print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess#,"prop(old/new) = ",proposal_fun(guess,guess_new,*arg[1]), "prop(new/old) = ",proposal_fun(guess_new,guess,*arg[1])
         #### will have to implement a log 
+        As.append(A)
         if A==0:
             guess=guess_new
             tests.append((guess))
             acceptance+=1
             f_old = f_new
             print "f_old = ",f_old
-            plt.loglog(Cl,"g",label="%d"%i,alpha = 0.5+i/100.)
+            plt.loglog(Cl,"g.",label="%d"%i,alpha = i/100.)
         elif A<0:
             u = np.log(np.random.rand(1))
+            print "u = ",u
             if u <= A:
                 guess=guess_new
                 tests.append((guess))
                 acceptance+=1
                 f_old = f_new
-                print "f_old = ",f_old
-                plt.loglog(Cl,"b",label="%d"%i,alpha = 0.5+i/100.)
+                print "Lucky choice ! f_old = ",f_old
+                plt.loglog(Cl,"b",label="%d"%i,alpha = i/100.)
             else:
                 failed.append((guess_new))
-                plt.loglog(Cl,"%f"%(i/100.), alpha=0.2)
+                plt.loglog(Cl,"%f"%(i/100.), alpha=0.1)
                 "f_old = ",f_old
                 pass
                 
@@ -214,7 +219,81 @@ def MCMC_log_test(guess,functional_form,proposal,proposal_fun,niter,*arg):
     return tests,failed,Cls
 
 
+def MCMC_log_test(guess,functional_form,proposal,proposal_fun,niter,*arg):
+    """
+    Same as previous, but for log likelihood
 
+    Keyword Arguments:
+    guess -- initial guess vector (np.array)
+    functional_form -- form you are trying to sample
+    proposal -- proposal random generator for next step
+    proposal_fun -- proposal function to calculate ratios (next version should have both proposal and proposal_fun in one go)
+    niter -- number of iterations
+    *arg -- arguments that could be used by the functional form, and the proposal: *arg[0] for the functional, *arg[1] for the proposal. It can be for example *arg = [A,x],[]
+    """
+    acceptance = 0
+    tests = []
+    failed = []
+    i=0
+    f_old,Cl = functional_form(guess,*arg[0])
+    plt.figure(10)
+    plt.loglog(Cl,"y",label="initial guess",)
+    tests.append((guess))
+    Cls = []
+    guesses = []
+    As = []
+    flag = []
+    like = []
+    while i<niter:
+        print i
+        guess_new = guess + proposal(*arg[1])
+        guesses.append(guess_new)
+        f_new,Cl = functional_form(guess_new,*arg[0])
+        Cls.append(Cl)
+        A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
+        print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess#,"prop(old/new) = ",proposal_fun(guess,guess_new,*arg[1]), "prop(new/old) = ",proposal_fun(guess_new,guess,*arg[1])
+        #### will have to implement a log 
+        As.append(A)
+        like.append(f_new)
+        if A==0:
+            guess=guess_new
+            flag.append(1)
+            acceptance+=1
+            f_old = f_new
+            print "f_old = ",f_old
+            plt.loglog(Cl,"g.",label="%d"%i,alpha = i/100.)
+        elif A<0:
+            u = np.log(np.random.rand(1))
+            print "u = ",u
+            if u <= A:
+                guess=guess_new
+                flag.append(2)
+                acceptance+=1
+                f_old = f_new
+                print "Lucky choice ! f_old = ",f_old
+                plt.loglog(Cl,"b",label="%d"%i,alpha = i/100.)
+            else:
+                plt.loglog(Cl,"%f"%(i/100.), alpha=0.1)
+                "f_old = ",f_old
+                flag.append(0)
+                pass
+                
+        i+=1
+        plt.draw()
+    print "acceptance rate = ",float(acceptance)/niter
+    return guesses,flag,like,As,Cls
+
+
+
+
+def autocorr(x):
+    '''
+    return the autocorrelation of a given array (much faster than computing the actual function)
+    '''
+    aa = np.correlate(x-x.mean(), x-x.mean(), mode='full')
+    maxcorr = np.argmax(aa)
+    result = aa / aa[maxcorr]
+    return result[np.argmax(result):]
 
 
 

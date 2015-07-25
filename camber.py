@@ -1,9 +1,13 @@
 import numpy as np
 import os
 import subprocess
-
+try:
+    from local_paths import *
+except:
+    print "you need to define local_paths.py, that defines, for example: \ncamb_dir = '/Users/benjar/Travail/camb/' \n and the output path for the temporary ini files: \noutput_camb = '../MH_MCMC/camb_ini/test1'"
+    sys.exit()
 #camb_dir -- path where camb should be called
-camb_dir = "/Users/benjar/Travail/camb/"
+
 
 
 def ini2dic(filename):

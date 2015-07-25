@@ -63,16 +63,14 @@ def functional_form_params_n(x,*arg):
     beam = arg[4]
     #params["output_root"] = '../Codes/CG_git/MH_MCMC/camb_ini/test%d'%np.random.randint(100)
     for i in range(np.size(x)):
-        print strings[i]
+        #print strings[i]
         if strings[i]=='scalar_amp(1)':
-            print params[strings[i]]
+            #print params[strings[i]]
             params[strings[i]]=np.exp(x[i])*1e-10
-            print params[strings[i]]
+            #print params[strings[i]]
         else:
             params[strings[i]]=x[i]
     Cl = cb.generate_spectrum(params)
-    plt.figure(10)
-    plt.loglog(Cl[:,1],",")
     lmax = Cl.shape[0]
     tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*Cl[:,1]+noise[:lmax]))))
     #determinant is the product of the diagonal element: in log:

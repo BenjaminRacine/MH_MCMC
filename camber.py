@@ -68,7 +68,8 @@ def generate_spectrum(dic):
     Keyword Arguments:
     dic -- parameter dictionnary
     """
-    run_camb(dic,1,"tempopo.ini")
+    Pid = np.random.randint(0,10000)
+    run_camb(dic,1,"tempopo%s.ini"%Pid)
     Cl = np.loadtxt("%s/%s_scalCls.dat"%(camb_dir,dic["output_root"]))
     # camb generates l(l+1)Cl/2/pi from lmin of 2 to lmax,
     # we want Cl from lmin = 0 for healpix : 
@@ -77,5 +78,5 @@ def generate_spectrum(dic):
     Cl = np.concatenate((l1l2,Cl))
     renorm = np.arange(Cl.shape[0])*np.arange(1,Cl.shape[0]+1)/2/np.pi
     Cl[1:,1:]/=renorm[1:,np.newaxis]
-
+    os.system("rm -rf tempopo%s.ini"%Pid)
     return Cl

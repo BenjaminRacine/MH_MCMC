@@ -186,39 +186,44 @@ def MCMC_log_test(guess,functional_form,proposal,proposal_fun,niter,*arg):
     As = []
     flag = []
     like = []
+    failed = 0
     while i<niter:
-        print i
-        guess_new = guess + proposal(*arg[1])
-        guesses.append(guess_new)
-        f_new,Cl = functional_form(guess_new,*arg[0])
-        Cls.append(Cl)
-        A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
-        print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess
-        As.append(A)
-        like.append(f_new)
-        if A==0:
-            guess=guess_new
-            flag.append(1)
-            acceptance+=1
-            f_old = f_new
-        elif A<0:
-            u = np.log(np.random.rand(1))
-            print "u = ",u
-            if u <= A:
+        try: 
+            print i
+            guess_new = guess + proposal(*arg[1])
+            guesses.append(guess_new)
+            f_new,Cl = functional_form(guess_new,*arg[0])
+            Cls.append(Cl)
+            A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
+            print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess
+            As.append(A)
+            like.append(f_new)
+            if A==0:
                 guess=guess_new
-                flag.append(2)
+                flag.append(1)
                 acceptance+=1
                 f_old = f_new
-                print "Lucky choice ! f_old = ",f_old
-            else:
-                flag.append(0)
-                pass
-        i+=1
-        if i%100==0:
-            np.save("tempo_MC_chain_%d.npy"%Pid,[guesses,flag,like,As,Cls])
-            print "temporary file saved"
-        #plt.draw()
+            elif A<0:
+                u = np.log(np.random.rand(1))
+                print "u = ",u
+                if u <= A:
+                    guess=guess_new
+                    flag.append(2)
+                    acceptance+=1
+                    f_old = f_new
+                    print "Lucky choice ! f_old = ",f_old
+                else:
+                    flag.append(0)
+                    pass
+            i+=1
+            if i%100==0:
+                np.save("tempo_MC_chain_%d.npy"%Pid,[guesses,flag,like,As,Cls])
+                print "temporary file saved"
+        except:
+            failed+=1
+            #plt.draw()
     print "acceptance rate = ",float(acceptance)/niter
+    print "%d fails"%failed
     return guesses,flag,like,As,Cls
 
 

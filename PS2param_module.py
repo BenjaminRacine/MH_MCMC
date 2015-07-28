@@ -75,4 +75,4 @@ def functional_form_params_n(x,*arg):
     tt = np.real(np.vdot(dlm.T,hp.almxfl(dlm,1/(beam[:lmax]**2*Cl[:,1]+noise[:lmax]))))
     #determinant is the product of the diagonal element: in log:
     tt = -1/2. * tt  - 1./2 *(np.arange(1,lmax+1)*np.log(noise[:lmax]+Cl[:,1]*beam[:lmax]**2)).sum()
-    return tt
+    return tt,Cl

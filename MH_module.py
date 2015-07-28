@@ -281,7 +281,7 @@ def MCMC_log_new(guess,functional_form,proposal,proposal_fun,niter,*arg):
                         pass
             i+=1
             if i%100==0:
-                np.save("tempo_MC_chain_%d.npy"%Pid,[guesses,flag])
+                np.save("tempo_MC_chain_%d.npy"%Pid,[np.array(guesses),np.array(flag)])
                 print "temporary file saved"
         except:
             failed+=1

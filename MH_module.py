@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-
+import sys
 
 def Equation_ap(x,A,b):
     """
@@ -249,6 +249,7 @@ def MCMC_log_new(guess,functional_form,proposal,proposal_fun,niter,*arg):
     #plt.figure(10)
     #plt.loglog(Cl,"y",label="initial guess",)
     guesses = []
+    guesses.append(guess)
     flag = []
     failed = 0
     while i<niter:
@@ -266,7 +267,6 @@ def MCMC_log_new(guess,functional_form,proposal,proposal_fun,niter,*arg):
                 if A==0:
                     guess=guess_new
                     flag.append(1)
-                    acceptance+=1
                     f_old = f_new
                 elif A<0:
                     u = np.log(np.random.rand(1))
@@ -281,13 +281,14 @@ def MCMC_log_new(guess,functional_form,proposal,proposal_fun,niter,*arg):
                         pass
             i+=1
             if i%100==0:
-                np.save("tempo_MC_chain_%d.npy"%Pid,[guesses,flag,like,As,Cls])
+                np.save("tempo_MC_chain_%d.npy"%Pid,[guesses,flag])
                 print "temporary file saved"
         except:
             failed+=1
+            print "error: %s on line %s"%(sys.exc_info()[0],sys.exc_info()[-1].tb_lineno)
             #plt.draw()
     print "%d fails"%failed
-    return guesses,flag
+    return np.array(guesses),np.array(flag)
 
 
 

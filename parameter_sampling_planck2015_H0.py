@@ -37,6 +37,8 @@ dd['scalar_spectral_index(1)'] = 0.9655
 dd['hubble'] = 67.31
 
 
+forced_priors = np.array([0,0,0.04,0,0,0])
+
 #Correlation_matrix = np.matrix([
 #    [100,-53,45,41,38,56],
 #    [0,100,-45,-45,-33,-83],
@@ -92,7 +94,7 @@ def run_MCMC(which_par,niter):
     x_mean_temp = x_mean[which_par]
     print titles_temp
     guess_param = PS2P.prop_dist_form_params(x_mean_temp,cov_new_temp)
-    testss = np.array(MH.MCMC_log_new(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,niter,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)]))
+    testss = np.array(MH.MCMC_log_new_priors(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,niter,forced_priors,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)]))
     #print "%.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
     return testss
 

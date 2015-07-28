@@ -318,10 +318,12 @@ def MCMC_log_new_priors(guess,functional_form,proposal,proposal_fun,niter,forced
     while i<niter:
         try: 
             print i
+            print forced_priors
             guess_new = guess + proposal(*arg[1])
             guesses.append(guess_new)
-            if np.array(guess_new)<priors:
-                print "Tau too low: ",guess_new[2]
+            print guess_new
+            if (np.array(guess_new)<forced_priors).sum()>0:
+                print "Priors : ",guess_new," vs. ", forced_priors
                 flag.append(0)
             #elif np.min(guess_new)<0:
             #    print "Negative param ! ",guess_new

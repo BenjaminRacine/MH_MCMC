@@ -63,7 +63,7 @@ x_mean = np.array([0.02222,0.1197,0.078,3.089,0.9655,67.31])
 
 #cov_new = plp.cor2cov(cov_diag,Correlation_matrix)
 cov_new = np.load("cov_tableTT_lowEB_2_3_5_6_7_23.npy")
-
+cov_diag = np.diag(cov_new)
 #[which_par,:][:,which_par]
 #[which_par]
 
@@ -97,10 +97,12 @@ def run_MCMC(which_par,niter):
     return testss
 
 def plot_chains(guesses,flag,titles,which_par):
-    guesses = np.concatenate(guesses)
-    guesses = guesses.reshape(len(flag),len(which_par))
+    #guesses = np.concatenate(guesses)
+    #guesses = guesses.reshape(len(flag),len(which_par))
     niter = len(flag)
     j=0
+    ini,guesses = guesses[0,:],guesses[1:,:] 
+    print "initial guess = ",ini
     for i in which_par:
         plt.figure()
         plt.plot(np.arange(niter)[flag==0],guesses[flag==0,j],'k.',alpha = 0.2,label='Rejected')

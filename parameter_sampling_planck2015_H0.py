@@ -97,6 +97,7 @@ def run_MCMC(which_par,niter):
     guess_param = PS2P.prop_dist_form_params(x_mean_temp,cov_new_temp)
     testss = np.array(MH.MCMC_log_new_priors(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,niter,forced_priors_temp,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)]))
     #print "%.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
+    np.save("chain_%s_%d_%d.npy"%(str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),np.random.randint(0,100000),niter),testss)
     return testss
 
 def plot_chains(guesses,flag,titles,which_par):

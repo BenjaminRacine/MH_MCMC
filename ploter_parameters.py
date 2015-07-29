@@ -121,7 +121,7 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
     return axScatter, axHistx
 
 
-def plot_like(guesses,like,flags,titles,which_par,save=0):
+def plot_like(guesses,like,flag,titles,which_par,save=0):
     """
     plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
     """
@@ -176,17 +176,18 @@ def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
     for i in which_par:
+        print j
         plt.figure()
         plt.plot(MH.autocorr(guesses[flag>0,j][burnin_cut:]))
         plt.title("%s autocorrelation"%titles[i])
         plt.ylabel(titles[i])
         plt.xlabel("Lag")
-        j+=1
         if save!=0:
             plt.savefig("plots/Autocorrelation_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
-
+        j+=1
             
 def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
+    plt.ioff()
     guesses,flag,like,Cls = chain
     plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save)
     plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save)
@@ -195,3 +196,4 @@ def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
     if save!=0:
         plt.savefig("plots/Triangle_%s.png"%save)
     plot_like(guesses,like,flag,titles,which_par,save)
+    

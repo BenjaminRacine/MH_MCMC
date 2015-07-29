@@ -122,5 +122,5 @@ def plot_chains(guesses,flag,titles,which_par,save=0):
         print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
         j+=1
         if save!=0:
-            plt.savefig("plots/chain_%s_%s.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ','')))#,SafeID))
+            plt.savefig("plots/chain_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),%d))#,SafeID))
             

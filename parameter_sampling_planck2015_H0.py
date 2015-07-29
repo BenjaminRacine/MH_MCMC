@@ -100,10 +100,11 @@ def run_MCMC(which_par,niter,save_title):
     np.save("chain_%s_%s_%d_%d.npy"%(save_title,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),np.random.randint(0,100000),niter),testss)
     return testss
 
-def plot_chains(guesses,flag,titles,which_par,save==0):
+def plot_chains(guesses,flag,titles,which_par,save=0):
     #guesses = np.concatenate(guesses)
     #guesses = guesses.reshape(len(flag),len(which_par))
     niter = len(flag)
+    #SafeID = np.random.randint(0,100000)
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
     print "initial guess = ",ini
@@ -121,5 +122,5 @@ def plot_chains(guesses,flag,titles,which_par,save==0):
         print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
         j+=1
         if save!=0:
-            plt.savefig("plots/chain_%s_%s_%d_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),np.random.randint(0,100000)))
+            plt.savefig("plots/chain_%s_%s.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ','')))#,SafeID))
             

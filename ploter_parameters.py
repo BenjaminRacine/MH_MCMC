@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from matplotlib.ticker import NullFormatter
 from matplotlib.patches import Ellipse  
-
+import MH_module as MH
 
 
 def Triangle_plot_Cov(Cov,x_mean,**kwargs):
@@ -78,10 +78,9 @@ def cor2cov(cov_diag,Correlation_matrix):
 
 
 
-def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,**kwargs):
+def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,**kwargs):
     """
     """
-    
     nullfmt   = NullFormatter()
     nb_param = guesses.shape[1]
     # definitions for the axes (left width and left_h is also bottom height and bottom_h)
@@ -100,9 +99,10 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,**kwargs):
         #sUtahtop
         ax_temp.plot(x1,np.exp(-0.5*(x1-x_mean[i])**2/Cov[i,i])/np.sqrt(2*np.pi*Cov[i,i]),**kwargs)
         ax_temp.hist(guesses[:,i][flag>0],np.sqrt(sum(flag>0)),histtype="step",normed=True)
+        ax_temp.title(titles[i])
+        ax_temp.xlim(x1.min(),x1.max())
         for j in range(i+1,nb_param):
             rect_scatter = [left+(i)*width, left+(nb_param-j-1)*width, width, width]
-            print j
             ax_temp=plt.axes(rect_scatter)
             ell = plot_ellipse(Cov[[i,j],:][:,[i,j]],x_mean[[i,j]],1,plot=1,axe=ax_temp,fill=False)
             ax_temp.scatter(guesses[:,i][flag==0],guesses[:,j][flag==0],color="k",alpha=0.05)
@@ -114,5 +114,80 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,**kwargs):
             ax_temp.xaxis.set_visible(False)
             ax_temp.yaxis.set_visible(False)
             axScatter.append(ax_temp)
+            ax_temp.xlim(x1.min(),x1.max())
             pass
     return axScatter, axHistx
+
+
+def plot_like(guesses,like,flags,titles,which_par,save=0):
+    """
+    plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
+    """
+    j=0
+    ini,guesses = guesses[0,:],guesses[1:,:] 
+    l_ini,l_guesses = like[0,:],like[1:,:] 
+    for i in which_par:
+        plt.figure()
+        plt.plot(guesses[flag==1,j],like[flag==1],".g",label="Accepted")
+        plt.plot(guesses[flag==2,j],like[flag==2],".r",label="Lucky accepted")
+        j+=1 
+        plt.title(titles[i])
+        plt.ylabel("Log Likelihood")
+        plt.xlabel(titles[i])
+        plt.legend(loc="best")
+        if save!=0:
+            plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+
+
+
+def plot_chains(guesses,flag,titles,which_par,save=0):
+    """
+    plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
+    """
+    #guesses = np.concatenate(guesses)
+    #guesses = guesses.reshape(len(flag),len(which_par))
+    niter = len(flag)
+    #SafeID = np.random.randint(0,100000)
+    j=0
+    ini,guesses = guesses[0,:],guesses[1:,:] 
+    print "initial guess = ",ini
+    for i in which_par:
+        plt.figure()
+        plt.plot(np.arange(niter)[flag==0],guesses[flag==0,j],'k.',alpha = 0.2,label='Rejected')
+        plt.plot(np.arange(niter)[flag==1],guesses[flag==1,j],'g.',label="Accepted")
+        plt.plot(np.arange(niter)[flag==2],guesses[flag==2,j],'r.',label='Lucky accepted')
+        plt.title(titles[i]+"MC chains")
+        plt.xlabel("Iterations")
+        plt.ylabel(titles[i])
+        plt.plot(np.arange(niter),x_mean[i]*np.ones(niter),color='b',label = "Planck prior")
+        plt.fill_between(np.arange(niter),x_mean[i]-np.sqrt(cov_diag[i]),x_mean[i]+np.sqrt(cov_diag[i]),color='b',alpha=0.2)
+        plt.legend(loc="best")
+        print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
+        j+=1
+        if save!=0:
+            plt.savefig("plots/chain_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+
+
+
+
+def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
+    j=0
+    ini,guesses = guesses[0,:],guesses[1:,:] 
+    for i in which_par:
+        plt.plot(MH.autocorr(guesses[flag>0,j][burnin_cut:]))
+        plt.title("%s autocorrelation"%titles[i])
+        plt.ylabel(titles[i])
+        plt.xlabel("Lag")
+        j+=1
+        if save!=0:
+            plt.savefig("plots/Autocorrelation_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+
+            
+def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
+    guesses,flag,like,Cls = chain
+    plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save)
+    plot_chains(guesses,flag,titles,which_par,save)
+    Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,**kwargs)
+    if save!=0:
+        plt.savefig("plots/Triangle_%s.png"%save)
+    plot_like(guesses,like,flag,titles,which_par,save)

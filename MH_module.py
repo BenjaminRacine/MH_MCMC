@@ -316,6 +316,7 @@ def MCMC_log_new_priors(guess,functional_form,proposal,proposal_fun,niter,forced
     like.append(f_old)
     failed = 0
     while i<niter:
+        print i
         try: 
             guess_new = guess + proposal(*arg[1])
             guesses.append(guess_new)

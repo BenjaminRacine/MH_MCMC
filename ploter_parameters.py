@@ -78,7 +78,7 @@ def cor2cov(cov_diag,Correlation_matrix):
 
 
 
-def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,**kwargs):
+def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
     """
     """
     nullfmt   = NullFormatter()
@@ -99,7 +99,7 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,**kwargs):
         #sUtahtop
         ax_temp.plot(x1,np.exp(-0.5*(x1-x_mean[i])**2/Cov[i,i])/np.sqrt(2*np.pi*Cov[i,i]),**kwargs)
         ax_temp.hist(guesses[:,i][flag>0],np.sqrt(sum(flag>0)),histtype="step",normed=True)
-        ax_temp.title(titles[i])
+        ax_temp.title(titles[which_par[i]])
         ax_temp.xlim(x1.min(),x1.max())
         for j in range(i+1,nb_param):
             rect_scatter = [left+(i)*width, left+(nb_param-j-1)*width, width, width]
@@ -140,7 +140,7 @@ def plot_like(guesses,like,flags,titles,which_par,save=0):
 
 
 
-def plot_chains(guesses,flag,titles,which_par,save=0):
+def plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save=0):
     """
     plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
     """
@@ -160,7 +160,7 @@ def plot_chains(guesses,flag,titles,which_par,save=0):
         plt.xlabel("Iterations")
         plt.ylabel(titles[i])
         plt.plot(np.arange(niter),x_mean[i]*np.ones(niter),color='b',label = "Planck prior")
-        plt.fill_between(np.arange(niter),x_mean[i]-np.sqrt(cov_diag[i]),x_mean[i]+np.sqrt(cov_diag[i]),color='b',alpha=0.2)
+        plt.fill_between(np.arange(niter),x_mean[i]-np.sqrt(Cov[i,i]),x_mean[i]+np.sqrt(Cov[i,i]),color='b',alpha=0.2)
         plt.legend(loc="best")
         print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
         j+=1
@@ -186,7 +186,7 @@ def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
 def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
     guesses,flag,like,Cls = chain
     plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save)
-    plot_chains(guesses,flag,titles,which_par,save)
+    plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save)
     Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,**kwargs)
     if save!=0:
         plt.savefig("plots/Triangle_%s.png"%save)

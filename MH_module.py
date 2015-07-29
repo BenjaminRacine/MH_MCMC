@@ -317,21 +317,22 @@ def MCMC_log_new_priors(guess,functional_form,proposal,proposal_fun,niter,forced
     failed = 0
     while i<niter:
         try: 
-            print i
-            print forced_priors
             guess_new = guess + proposal(*arg[1])
             guesses.append(guess_new)
             print guess_new
+            f_new,Cl = functional_form(guess_new,*arg[0])
+            like.append(f_new)
+            Cls.append(Cl)
             if (np.array(guess_new)<forced_priors).sum()>0:
                 print "Priors : ",guess_new," vs. ", forced_priors
-                flag.append(0)
-            #elif np.min(guess_new)<0:
+                flag.append(-1)
+                #elif np.min(guess_new)<0:
             #    print "Negative param ! ",guess_new
             #    flag.append(0)
             else:
-                f_new,Cl = functional_form(guess_new,*arg[0])
-                like.append(f_new)
-                Cls.append(Cl)
+                #f_new,Cl = functional_form(guess_new,*arg[0])
+                #like.append(f_new)
+                #Cls.append(Cl)
                 A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
                 print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess
                 if A==0:
@@ -352,7 +353,7 @@ def MCMC_log_new_priors(guess,functional_form,proposal,proposal_fun,niter,forced
             i+=1
             if i%100==0:
                 np.save("tempo_MC_chain_%d.npy"%Pid,[np.array(guesses),np.array(flag),np.array(like),np.array(Cls)])
-                print "temporary file saved"
+                print "temporary file saved: %d"%Pid
         except:
             failed+=1
             print "error: %s on line %s"%(sys.exc_info()[0],sys.exc_info()[-1].tb_lineno)

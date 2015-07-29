@@ -88,6 +88,8 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
     width = 0.9/(nb_param) 
     axHistx=[]
     axScatter=[]
+    x_mean = x_mean[which_par]
+    Cov = Cov[which_par,:][:,which_par]
     for i in range(nb_param):
         rect_histx = [left+i*width, left+(nb_param-1-i)*width, width, width]
         ax_temp = plt.axes(rect_histx)
@@ -99,8 +101,8 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
         #sUtahtop
         ax_temp.plot(x1,np.exp(-0.5*(x1-x_mean[i])**2/Cov[i,i])/np.sqrt(2*np.pi*Cov[i,i]),**kwargs)
         ax_temp.hist(guesses[:,i][flag>0],np.sqrt(sum(flag>0)),histtype="step",normed=True)
-        ax_temp.title(titles[which_par[i]])
-        ax_temp.xlim(x1.min(),x1.max())
+        ax_temp.set_title(titles[which_par[i]])
+        ax_temp.set_xlim(x1.min(),x1.max())
         for j in range(i+1,nb_param):
             rect_scatter = [left+(i)*width, left+(nb_param-j-1)*width, width, width]
             ax_temp=plt.axes(rect_scatter)
@@ -114,7 +116,7 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
             ax_temp.xaxis.set_visible(False)
             ax_temp.yaxis.set_visible(False)
             axScatter.append(ax_temp)
-            ax_temp.xlim(x1.min(),x1.max())
+            ax_temp.set_xlim(x1.min(),x1.max())
             pass
     return axScatter, axHistx
 
@@ -125,7 +127,7 @@ def plot_like(guesses,like,flags,titles,which_par,save=0):
     """
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
-    l_ini,l_guesses = like[0,:],like[1:,:] 
+    l_ini,l_guesses = like[0],like[1:] 
     for i in which_par:
         plt.figure()
         plt.plot(guesses[flag==1,j],like[flag==1],".g",label="Accepted")
@@ -174,6 +176,7 @@ def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
     for i in which_par:
+        plt.figure()
         plt.plot(MH.autocorr(guesses[flag>0,j][burnin_cut:]))
         plt.title("%s autocorrelation"%titles[i])
         plt.ylabel(titles[i])
@@ -187,7 +190,8 @@ def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
     guesses,flag,like,Cls = chain
     plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save)
     plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save)
-    Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,**kwargs)
+    plt.figure()
+    Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par)
     if save!=0:
         plt.savefig("plots/Triangle_%s.png"%save)
     plot_like(guesses,like,flag,titles,which_par,save)

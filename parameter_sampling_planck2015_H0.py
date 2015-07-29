@@ -122,5 +122,28 @@ def plot_chains(guesses,flag,titles,which_par,save=0):
         print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
         j+=1
         if save!=0:
-            plt.savefig("plots/chain_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),%d))#,SafeID))
+            plt.savefig("plots/chain_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
             
+
+
+
+def plot_like(chain,titles,save_title,which_par):
+    j=0
+    for i in which_par:
+        plt.figure()
+        plt.plot(chain[0][1:,j][chain[1]==1],chain[2][1:][chain[1]==1],".g",label="Accepted")
+        plt.plot(chain[0][1:,j][chain[1]==2],chain[2][1:][chain[1]==2],".r",label="Lucky accepted")
+        j+=1 
+        plt.title(titles[i])
+        plt.ylabel("Log Likelihood")
+        plt.xlabel(titles[i])
+        plt.legend(loc="best")
+        if save!=0:
+            plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+
+
+def plotplot(chain,save_title,whichpar):
+    plt.figure()
+    plp.Triangle_plot_Cov_dat(chain[0][1:,:],chain[1],x_mean[whichpar],cov_new[whichpar,:][:,whichpar])
+    plt.savefig("plots/Triangle_%s.png"%save_title)
+    plot_chains(chain[0],chain[1],titles,whichpar,save_title)

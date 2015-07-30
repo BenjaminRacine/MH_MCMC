@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import subprocess
+import sys
 try:
     from local_paths import *
 except:
@@ -83,4 +84,5 @@ def generate_spectrum(dic):
     renorm = np.arange(Cl.shape[0])*np.arange(1,Cl.shape[0]+1)/2/np.pi
     Cl[1:,1:]/=renorm[1:,np.newaxis]
     os.system("rm -rf tempopo%s.ini"%Pid)
+    os.system("rm -rf %s/%s_scalCls.dat"%(camb_dir,dic["output_root"]))
     return Cl

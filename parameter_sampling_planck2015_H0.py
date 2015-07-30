@@ -36,8 +36,9 @@ dd['scalar_amp(1)'] = np.exp(3.089)*1e-10
 dd['scalar_spectral_index(1)'] = 0.9655
 dd['hubble'] = 67.31
 
-
-forced_priors = np.array([0,0,0.04,0,0,0])
+priors_central = np.array([0,0,0.07,0,0,0])
+priors_invvar = np.array([0,0,1/0.02**2,0,0,0])
+#forced_priors = np.array([0,0,0.04,0,0,0])
 
 #Correlation_matrix = np.matrix([
 #    [100,-53,45,41,38,56],
@@ -87,63 +88,22 @@ def plot_input(dlm):
 
 
 
+
 def run_MCMC(which_par,niter,save_title):
     cov_new_temp = cov_new[which_par,:][:,which_par]
     string_temp = strings[which_par]
     titles_temp = titles[which_par]
     x_mean_temp = x_mean[which_par]
-    forced_priors_temp = forced_priors[which_par]
+    priors_central_temp = priors_central[which_par]
+    priors_invvar_temp = priors_invvar[which_par]
     print titles_temp
     guess_param = PS2P.prop_dist_form_params(x_mean_temp,cov_new_temp)
-    testss = np.array(MH.MCMC_log_new_priors(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,niter,forced_priors_temp,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)]))
+    testss = np.array(MH.MCMC_log(guess_param, PS2P.functional_form_params_n,PS2P.prop_dist_form_params, PS2P.prop_func_form_params,niter,PS2P.Gaussian_priors_func,[dlm,string_temp,dd,nl,bl],[x_mean_temp*0,np.matrix(cov_new_temp)],[priors_central_temp,priors_invvar_temp]))
     #print "%.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
     np.save("chain_%s_%s_%d_%d.npy"%(save_title,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),np.random.randint(0,100000),niter),testss)
     return testss
 
-def plot_chains(guesses,flag,titles,which_par,save=0):
-    #guesses = np.concatenate(guesses)
-    #guesses = guesses.reshape(len(flag),len(which_par))
-    niter = len(flag)
-    #SafeID = np.random.randint(0,100000)
-    j=0
-    ini,guesses = guesses[0,:],guesses[1:,:] 
-    print "initial guess = ",ini
-    for i in which_par:
-        plt.figure()
-        plt.plot(np.arange(niter)[flag==0],guesses[flag==0,j],'k.',alpha = 0.2,label='Rejected')
-        plt.plot(np.arange(niter)[flag==1],guesses[flag==1,j],'g.',label="Accepted")
-        plt.plot(np.arange(niter)[flag==2],guesses[flag==2,j],'r.',label='Lucky accepted')
-        plt.title(titles[i]+"MC chains")
-        plt.xlabel("Iterations")
-        plt.ylabel(titles[i])
-        plt.plot(np.arange(niter),x_mean[i]*np.ones(niter),color='b',label = "Planck prior")
-        plt.fill_between(np.arange(niter),x_mean[i]-np.sqrt(cov_diag[i]),x_mean[i]+np.sqrt(cov_diag[i]),color='b',alpha=0.2)
-        plt.legend(loc="best")
-        print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
-        j+=1
-        if save!=0:
-            plt.savefig("plots/chain_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
-            
 
 
 
-def plot_like(chain,titles,save_title,which_par):
-    j=0
-    for i in which_par:
-        plt.figure()
-        plt.plot(chain[0][1:,j][chain[1]==1],chain[2][1:][chain[1]==1],".g",label="Accepted")
-        plt.plot(chain[0][1:,j][chain[1]==2],chain[2][1:][chain[1]==2],".r",label="Lucky accepted")
-        j+=1 
-        plt.title(titles[i])
-        plt.ylabel("Log Likelihood")
-        plt.xlabel(titles[i])
-        plt.legend(loc="best")
-        if save!=0:
-            plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
 
-
-def plotplot(chain,save_title,whichpar):
-    plt.figure()
-    plp.Triangle_plot_Cov_dat(chain[0][1:,:],chain[1],x_mean[whichpar],cov_new[whichpar,:][:,whichpar])
-    plt.savefig("plots/Triangle_%s.png"%save_title)
-    plot_chains(chain[0],chain[1],titles,whichpar,save_title)

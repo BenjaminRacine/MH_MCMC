@@ -76,3 +76,18 @@ def functional_form_params_n(x,*arg):
     #determinant is the product of the diagonal element: in log:
     tt = -1/2. * tt  - 1./2 *(np.arange(1,lmax+1)*np.log(noise[:lmax]+Cl[:,1]*beam[:lmax]**2)).sum()
     return tt,Cl[:,1]
+
+
+
+def Gaussian_priors_func(guesses,central,invvar):
+    """
+    Returns the priors given an array of guesses. 
+    Keyword Arguments:
+    guesses -- the input guesses from the MCMC (np.array)
+    central --  the central value of the prior (np.array)
+    invsigmas -- inverse variance (here only diagonal)
+    
+    Note: the returned value is in "log space"
+    """
+    return [-0.5 * np.dot(np.dot((guesses[i]-central[i]).T,invvar[i]),guesses[i]-central[i]) for i in range(len(central))]
+

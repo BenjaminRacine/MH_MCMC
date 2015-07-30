@@ -121,7 +121,7 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
     return axScatter, axHistx
 
 
-def plot_like(guesses,like,flag,titles,which_par,save=0):
+def plot_like_profile(guesses,like,flag,titles,which_par,save=0):
     """
     plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
     """
@@ -136,6 +136,25 @@ def plot_like(guesses,like,flag,titles,which_par,save=0):
         plt.title(titles[i])
         plt.ylabel("Log Likelihood")
         plt.xlabel(titles[i])
+        plt.legend(loc="best")
+        if save!=0:
+            plt.savefig("plots/log_like_profile_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+
+def plot_like(guesses,like,flag,titles,which_par,save=0):
+    """
+    plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
+    """
+    j=0
+    ini,guesses = guesses[0,:],guesses[1:,:] 
+    l_ini,like = like[0],like[1:] 
+    for i in which_par:
+        plt.figure()
+        plt.plot(like[flag==1],".g",label="Accepted")
+        plt.plot(like[flag==2],".r",label="Lucky accepted")
+        j+=1 
+        plt.title(titles[i])
+        plt.ylabel("Log Likelihood")
+        plt.xlabel("Iteration")
         plt.legend(loc="best")
         if save!=0:
             plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
@@ -196,4 +215,5 @@ def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
     if save!=0:
         plt.savefig("plots/Triangle_%s.png"%save)
     plot_like(guesses,like,flag,titles,which_par,save)
+    plot_like_profile(guesses,like,flag,titles,which_par,save)
     

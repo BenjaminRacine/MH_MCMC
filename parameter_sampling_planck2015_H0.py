@@ -89,8 +89,8 @@ def plot_input(dlm):
 
 
 
-def run_MCMC(which_par,niter,save_title):
-    cov_new_temp = cov_new[which_par,:][:,which_par]
+def run_MCMC(which_par,niter,save_title, renorm_var):
+    cov_new_temp = cov_new[which_par,:][:,which_par] * renorm_var
     string_temp = strings[which_par]
     titles_temp = titles[which_par]
     x_mean_temp = x_mean[which_par]

@@ -365,6 +365,87 @@ def MCMC_log_new_priors(guess,functional_form,proposal,proposal_fun,niter,forced
 
 
 
+
+def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,priors_func,*arg):
+    """
+    Same as previous, but for log likelihood
+
+    Keyword Arguments:
+    guess -- initial guess vector (np.array)
+    functional_form -- form you are trying to sample
+    proposal -- proposal random generator for next step
+    proposal_fun -- proposal function to calculate ratios (next version should have both proposal and proposal_fun in one go)
+    niter -- number of iterations
+    *arg -- arguments that could be used by the functional form, and the proposal: 
+    *arg[0] for the functional, 
+    *arg[1] for the proposal. 
+    *arg[2] for the priors
+    It can be for example *arg = [A,x],[],[0,1/0.5**2]
+    """
+    Pid = np.random.randint(0,10000)
+    print "Pid = %d"%Pid
+    failed = []
+    i=0
+    f_old,Cl = functional_form(guess,*arg[0])
+    #plt.figure(10)
+    #plt.loglog(Cl,"y",label="initial guess",)
+    guesses = []
+    guesses.append(guess)
+    flag = []
+    Cls=[]
+    Cls.append(Cl)
+    like=[]
+    like.append(f_old)
+    failed = 0
+    while i<niter:
+        print i
+        try:
+            guess_new = guess + proposal(*arg[1])
+            guesses.append(guess_new)
+            print guess_new
+            if np.min(guess_new)<0:
+                print "Negative param ! ",guess_new
+                flag.append(-1)
+            else:
+                f_new,Cl = functional_form(guess_new,*arg[0])
+                like.append(f_new)
+                Cls.append(Cl)
+                f_new += sum(priors_func(guess_new,*arg[2]))
+                print priors_func(guess_new,*arg[2])
+                #f_new,Cl = functional_form(guess_new,*arg[0])
+                #like.append(f_new)
+                #Cls.append(Cl)
+                A = min(0,f_new-f_old+proposal_fun(guess,guess_new,*arg[1])-proposal_fun(guess_new,guess,*arg[1]))
+                print A,"f_new = ",f_new,"f_old = ",f_old, "guess_new = ", guess_new, "guess_old = ",guess
+                if A==0:
+                    guess=guess_new
+                    flag.append(1)
+                    f_old = f_new
+                elif A<0:
+                    u = np.log(np.random.rand(1))
+                    print "u = ",u
+                    if u <= A:
+                        guess=guess_new
+                        flag.append(2)
+                        f_old = f_new
+                        print "Lucky choice ! f_old = ",f_old
+                    else:
+                        flag.append(0)
+                        pass
+            i+=1
+            if i%100==0:
+                np.save("tempo_MC_chain_%d.npy"%Pid,[np.array(guesses),np.array(flag),np.array(like),np.array(Cls)])
+                print "temporary file saved: %d"%Pid
+        except:
+            failed+=1
+            print "error: %s on line %s"%(sys.exc_info()[0],sys.exc_info()[-1].tb_lineno)
+            #plt.draw()
+    print "%d fails"%failed
+    return np.array(guesses),np.array(flag),np.array(like),np.array(Cls)
+
+
+
+
 def autocorr(x):
     '''
     return the autocorrelation of a given array (much faster than computing the actual function)

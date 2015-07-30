@@ -97,7 +97,7 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
         ax_temp.xaxis.tick_top()
         ax_temp.yaxis.set_visible(False)#tick_right()
         ax_temp.locator_params(nbins=4)
-        x1 = np.linspace(x_mean[i]- 3*np.sqrt(Cov[i,i]),x_mean[i] + 3*np.sqrt(Cov[i,i]),200)
+        x1 = np.linspace(x_mean[i]- 5*np.sqrt(Cov[i,i]),x_mean[i] + 5*np.sqrt(Cov[i,i]),200)
         #sUtahtop
         ax_temp.plot(x1,np.exp(-0.5*(x1-x_mean[i])**2/Cov[i,i])/np.sqrt(2*np.pi*Cov[i,i]),**kwargs)
         ax_temp.hist(guesses[:,i][flag>0],np.sqrt(sum(flag>0)),histtype="step",normed=True)
@@ -127,7 +127,7 @@ def plot_like(guesses,like,flag,titles,which_par,save=0):
     """
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
-    l_ini,l_guesses = like[0],like[1:] 
+    l_ini,like = like[0],like[1:] 
     for i in which_par:
         plt.figure()
         plt.plot(guesses[flag==1,j],like[flag==1],".g",label="Accepted")

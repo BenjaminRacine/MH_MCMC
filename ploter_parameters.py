@@ -173,7 +173,7 @@ def plot_like(guesses,like,flag,titles,which_par,save=0):
     plt.xlabel("Iteration")
     plt.legend(loc="best")
     if save!=0:
-        plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+        plt.savefig("plots/log_like_%s_%s.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ','')))#,SafeID))
 
 
 
@@ -249,6 +249,9 @@ def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0,plot_int = 0
     else:
         plt.ion()
     guesses,flag,like,Cls = chain
+    Cls=Cls[flag!=-2]
+    like=like[flag!=-2]
+    flag=flag[flag!=-2]
     plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save)
     plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save)
     plt.figure()

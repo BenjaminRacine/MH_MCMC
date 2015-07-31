@@ -88,6 +88,7 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,priors_func,*arg)
     guesses = []
     guesses.append(guess)
     flag = []
+    flag.append(-3)
     Cls=[]
     Cls.append(Cl)
     like=[]
@@ -135,6 +136,9 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,priors_func,*arg)
         except:
             failed+=1
             print "error: %s on line %s"%(sys.exc_info()[0],sys.exc_info()[-1].tb_lineno)
+            flag.append(-2)
+            like.append(-2)
+            Cls.append(0)
             #plt.draw()
     print "%d fails"%failed
     return np.array(guesses),np.array(flag),np.array(like),np.array(Cls)

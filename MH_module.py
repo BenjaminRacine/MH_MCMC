@@ -81,7 +81,7 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,priors_func,*arg)
     """
     Pid = np.random.randint(0,10000)
     print "Pid = %d"%Pid
-    print priors_func(guess_new,*arg[2])
+    print "priors= ",arg[2])
     failed = []
     i=0
     f_old,Cl = functional_form(guess,*arg[0])

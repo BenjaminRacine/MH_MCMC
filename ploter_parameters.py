@@ -143,8 +143,6 @@ def plot_like_profile(guesses,like,flag,titles,which_par,save=0):
     which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
     """
     j=0
-    ini,guesses = guesses[0,:],guesses[1:,:] 
-    l_ini,like = like[0],like[1:] 
     for i in which_par:
         plt.figure()
         plt.plot(guesses[flag==1,j],like[flag==1],".g",label="Accepted")
@@ -168,8 +166,6 @@ def plot_like(guesses,like,flag,titles,which_par,save=0):
     titles -- a list of titles for the plots
     which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
     """
-    ini,guesses = guesses[0,:],guesses[1:,:] 
-    l_ini,like = like[0],like[1:] 
     plt.figure()
     plt.plot(np.arange(len(guesses))[flag==1],like[flag==1],".g",label="Accepted")
     plt.plot(np.arange(len(guesses))[flag==2],like[flag==2],".r",label="Lucky accepted")
@@ -195,8 +191,6 @@ def plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save=0):
     """
     niter = len(flag)
     j=0
-    ini,guesses = guesses[0,:],guesses[1:,:] 
-    print "initial guess = ",ini
     for i in which_par:
         plt.figure()
         plt.plot(np.arange(niter)[flag==0],guesses[flag==0,j],'k.',alpha = 0.2,label='Rejected')
@@ -230,7 +224,6 @@ def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
 
     """
     j=0
-    ini,guesses = guesses[0,:],guesses[1:,:] 
     for i in which_par:
         print j
         plt.figure()

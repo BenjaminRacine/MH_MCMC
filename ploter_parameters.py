@@ -80,6 +80,16 @@ def cor2cov(cov_diag,Correlation_matrix):
 
 def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
     """
+    Returns the triangle plots for a given chain, and compare to a given prediction
+
+    Keyword Arguments:
+    guesses -- the full list of generated guesses from the MCMC
+    flag -- a list giving 0 for rejected, 1 for accepted, 2 for accepted even if likelihood is lower, and -1 for forbidden values (most probably negative ones)
+    x_mean -- mean value corresponding to input data
+    Cov -- covariance matrix (probably extracted from paper of other chains)
+    titles -- a list of titles for the plots
+    which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
+    **kwargs are a set of arguments for the ellipses (to be tested)
     """
     nullfmt   = NullFormatter()
     nb_param = guesses.shape[1]
@@ -124,6 +134,13 @@ def Triangle_plot_Cov_dat(guesses,flag,x_mean,Cov,titles,which_par,**kwargs):
 def plot_like_profile(guesses,like,flag,titles,which_par,save=0):
     """
     plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
+
+    Keyword Arguments:
+    guesses -- the full list of generated guesses from the MCMC
+    like -- list of likelihood values from the MCMC
+    flag -- a list giving 0 for rejected, 1 for accepted, 2 for accepted even if likelihood is lower, and -1 for forbidden values (most probably negative ones)
+    titles -- a list of titles for the plots
+    which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
     """
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
@@ -142,33 +159,41 @@ def plot_like_profile(guesses,like,flag,titles,which_par,save=0):
 
 def plot_like(guesses,like,flag,titles,which_par,save=0):
     """
-    plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
+    Plots the likelihood values, ie the log likelihood as a function of iteration.
+
+    Keyword Arguments:
+    guesses -- the full list of generated guesses from the MCMC
+    like -- list of likelihood values from the MCMC
+    flag -- a list giving 0 for rejected, 1 for accepted, 2 for accepted even if likelihood is lower, and -1 for forbidden values (most probably negative ones)
+    titles -- a list of titles for the plots
+    which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
     """
-    j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
     l_ini,like = like[0],like[1:] 
-    for i in which_par:
-        plt.figure()
-        plt.plot(like[flag==1],".g",label="Accepted")
-        plt.plot(like[flag==2],".r",label="Lucky accepted")
-        j+=1 
-        plt.title(titles[i])
-        plt.ylabel("Log Likelihood")
-        plt.xlabel("Iteration")
-        plt.legend(loc="best")
-        if save!=0:
-            plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
+    plt.figure()
+    plt.plot(np.arange(len(guesses))[flag==1],like[flag==1],".g",label="Accepted")
+    plt.plot(np.arange(len(guesses))[flag==2],like[flag==2],".r",label="Lucky accepted")
+    plt.ylabel("Log Likelihood")
+    plt.xlabel("Iteration")
+    plt.legend(loc="best")
+    if save!=0:
+        plt.savefig("plots/log_like_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
 
 
 
 def plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save=0):
     """
-    plots the 1D likelihood profiles, ie the log likelihood as a function of the parameters.
+    Plots the chains for all parameters, and the priors
+
+    Keyword Arguments:
+    guesses -- the full list of generated guesses from the MCMC
+    flag -- a list giving 0 for rejected, 1 for accepted, 2 for accepted even if likelihood is lower, and -1 for forbidden values (most probably negative ones)
+    titles -- a list of titles for the plots
+    which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
+    x_mean -- mean value corresponding to input data
+    Cov -- covariance matrix (probably extracted from paper of other chains)
     """
-    #guesses = np.concatenate(guesses)
-    #guesses = guesses.reshape(len(flag),len(which_par))
     niter = len(flag)
-    #SafeID = np.random.randint(0,100000)
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
     print "initial guess = ",ini
@@ -183,6 +208,7 @@ def plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save=0):
         plt.plot(np.arange(niter),x_mean[i]*np.ones(niter),color='b',label = "Planck prior")
         plt.fill_between(np.arange(niter),x_mean[i]-np.sqrt(Cov[i,i]),x_mean[i]+np.sqrt(Cov[i,i]),color='b',alpha=0.2)
         plt.legend(loc="best")
+        tot = len(flag)
         print titles[i],": %.2f rejected; %.2f accepted; %.2f Lucky accepted"%((flag==0).mean(),(flag==1).mean(),(flag==2).mean())
         j+=1
         if save!=0:
@@ -192,6 +218,17 @@ def plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save=0):
 
 
 def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
+    """
+    Plots the chains for all parameters, and the priors
+
+    Keyword Arguments:
+    guesses -- the full list of generated guesses from the MCMC
+    flag -- a list giving 0 for rejected, 1 for accepted, 2 for accepted even if likelihood is lower, and -1 for forbidden values (most probably negative ones)
+    titles -- a list of titles for the plots
+    which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
+    burnin_cut -- cut the first few iterations for computation of the autocorr
+
+    """
     j=0
     ini,guesses = guesses[0,:],guesses[1:,:] 
     for i in which_par:
@@ -205,8 +242,19 @@ def plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save=0):
             plt.savefig("plots/Autocorrelation_%s_%s_%d.png"%(save,str(which_par).replace(',','').replace('[','').replace(']','').replace(' ',''),j))#,SafeID))
         j+=1
             
-def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0):
-    plt.ioff()
+def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0,plot_int = 0):
+    """
+    chain -- output of the MCMC, should contain guesses,flag,like,Cls
+    titles -- a list of titles for the plots
+    which_par -- a list of indices, corresponding to the order defined above, exemple [0,2] means ombh2,tau if order is [ombh2,omch2,tau,As,ns,H0]
+    burnin_cut -- cut the first few iterations for computation of the autocorr
+    x_mean -- mean value corresponding to input data
+    Cov -- covariance matrix (probably extracted from paper of other chains)
+    """
+    if plot_int==0:
+        plt.ioff()
+    else:
+        plt.ion()
     guesses,flag,like,Cls = chain
     plot_autocorr(guesses,flag,titles,which_par,burnin_cut,save)
     plot_chains(guesses,flag,titles,which_par,x_mean,Cov,save)

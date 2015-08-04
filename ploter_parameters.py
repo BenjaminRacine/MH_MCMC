@@ -249,6 +249,10 @@ def plot_all(chain,titles,which_par,x_mean,Cov,burnin_cut=50,save=0,plot_int = 0
     else:
         plt.ion()
     guesses,flag,like,Cls = chain
+    guesses = np.concatenate(guesses)
+    guesses = guesses.reshape(len(guesses)/len(which_par),len(which_par))
+    #Cls = np.concatenate(Cls)
+    #Cls = Cls.reshape(len(Cls)/2,2)
     Cls=Cls[flag!=-2]
     like=like[flag!=-2]
     flag=flag[flag!=-2]

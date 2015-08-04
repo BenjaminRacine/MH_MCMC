@@ -127,24 +127,22 @@ def MCMC_log(guess,functional_form,proposal,proposal_fun,niter,priors_func,*arg)
                         flag.append(0)
                         pass
             i+=1
+
             if i%50==0:
                 flag_temp = np.array(flag)
                 print "%.2f rejected; %.2f accepted; %.2f Lucky accepted; %d negative: try removed"%(len(np.where(flag_temp==0)[0])/float(i),len(np.where(flag_temp==1)[0])/float(i),len(np.where(flag_temp==2)[0])/float(i),len(np.where(flag_temp==-1)[0]))
                 if i%100==0:
-                    np.save("tempo_MC_chain_%d.npy"%Pid,[np.array(guesses),np.array(flag),np.array(like),np.array(Cls)])
+                    np.save("tempo_MC_chain_%d.npy"%Pid,[guesses,np.array(flag),np.array(like),Cls])
                     print "temporary file saved: %d"%Pid
         except:
             failed+=1
             print "error: %s on line %s"%(sys.exc_info()[0],sys.exc_info()[-1].tb_lineno)
-            guesses.append(0)
             flag.append(-2)
             like.append(-2)
-            Cls.append(0)
+            Cls.append(np.zeros(len(Cl_old)))
             #plt.draw()
     print "%d fails"%failed
-    return np.array(guesses),np.array(flag),np.array(like),np.array(Cls)
-
-
+    return guesses,np.array(flag),np.array(like),Cls
 
 
 
